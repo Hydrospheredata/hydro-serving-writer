@@ -54,7 +54,7 @@ class ModelVersionBufferPool:
         for row in zip(*(getattr(request, name) for name in scheme.names)):
             group[row[0]].MergeFrom(
                 writer.WriteManyRequest(
-                    **dict(zip(scheme.names, map(lambda x: [x], row)))
+                    **{name: [value] for name, value in zip(scheme.names, values)}
                 )
             )
         return group
