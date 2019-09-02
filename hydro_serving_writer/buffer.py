@@ -69,7 +69,7 @@ class ModelVersionBuffer:
         logger.debug("Initialized new {}".format(self))
 
     def __repr__(self):
-        return f"ModelVersionBuffer(version={self.__version})"
+        return "ModelVersionBuffer(version={})".format(self.__version)
     
     @property
     def output_stream(self) -> pa.BufferOutputStream: 
@@ -154,11 +154,12 @@ class ModelVersionBuffer:
     def dump(self, filename, requests):
         """ Dump requests to parquet and upload them to storage """
 
-        data = {name: pa.array(getattr(requests, name), type=type)
-                for name, type in zip(scheme.names, scheme.types)}
-        for name, type in zip(scheme.names, scheme.types):
-            data[name] = pa.array(getattr(requests, name), type=type)
-
+        data = {
+            name: pa.array(getattr(requests, name), type=type) 
+            for name, type in zip(scheme.names, scheme.types)
+        }
+        
         table = pa.table(data, scheme)
         pq.write_table(table, filename)
+
         logger.info("Dumped all data from {} to {}".format(self, filename))
