@@ -88,7 +88,7 @@ class ModelVersionBuffer:
             raise ValueError("Message is greater than buffer size")
         return self.output_stream.tell() + length + 4 < self.__buffer_size
 
-    def _read_request_length(self, stream: pa.BufferReader) -> int: 
+    def _read_request_length(self, stream: pa.BufferReader) -> Optional[int]: 
         if stream.tell() + 4 <= self.__buffer_size: 
             return int.from_bytes(stream.read(4), "big")
     
