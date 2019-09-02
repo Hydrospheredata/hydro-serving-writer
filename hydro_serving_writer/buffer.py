@@ -1,5 +1,5 @@
 import os, logging, datetime
-from typing import Dict
+from typing import Dict, Optional
 from collections import defaultdict
 from concurrent import futures
 import pyarrow as pa, pyarrow.parquet as pq
