@@ -154,7 +154,8 @@ class ModelVersionBuffer:
     def dump(self, filename, requests):
         """ Dump requests to parquet and upload them to storage """
 
-        data = dict()
+        data = {name: pa.array(getattr(requests, name), type=type)
+                for name, type in zip(scheme.names, scheme.types)}
         for name, type in zip(scheme.names, scheme.types):
             data[name] = pa.array(getattr(requests, name), type=type)
 
