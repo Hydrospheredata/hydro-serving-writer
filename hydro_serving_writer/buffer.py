@@ -111,7 +111,6 @@ class ModelVersionBuffer:
                 # Dump buffer to parquet file
                 future = executor.submit(
                     self.dump, filename=source_path, requests=requests)
-                logger.info(future.result())
 
                 # Upload parquet file to Storage
                 future.add_done_callback(
