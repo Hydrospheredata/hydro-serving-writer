@@ -10,7 +10,7 @@ TAG ?= latest
 DEBUG ?= 0
 SERVER_PORT ?= 50051
 SERVER_MAX_WORKERS ?= 1
-STORAGE_TYPE ?= s3
+STORAGE_TYPE ?= local
 STORAGE_BUCKET ?= workflow-orchestrator-test
 STORAGE_ACCESS_KEY ?= \
 	$(shell sed '2q;d' ~/.aws/credentials | cut -d ' ' -f 3)
@@ -19,7 +19,7 @@ STORAGE_SECRET_ACCESS_KEY ?= \
 BUFFER_SIZE ?= 4194304
 
 all: serve
-serve: clean-parquet 
+serve: clean 
 	DEBUG=$(DEBUG) SERVER_PORT=$(SERVER_PORT) SERVER_MAX_WORKERS=$(SERVER_MAX_WORKERS) \
 	STORAGE_TYPE=$(STORAGE_TYPE) STORAGE_BUCKET=$(STORAGE_BUCKET) BUFFER_SIZE=$(BUFFER_SIZE) \
 	STORAGE_ACCESS_KEY=$(STORAGE_ACCESS_KEY) STORAGE_SECRET_ACCESS_KEY=$(STORAGE_SECRET_ACCESS_KEY) \
@@ -35,5 +35,7 @@ push-container:
 	@echo Pushing image to the registry
 	docker push $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(TAG)
 
+clean: clean-parquet
+	rm -rf $(STORAGE_BUCKET)
 clean-parquet:
 	rm -rf *.parquet

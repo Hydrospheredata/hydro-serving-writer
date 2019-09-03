@@ -4,11 +4,33 @@ import random
 import datetime
 import itertools
 from hydro_serving_grpc import writer
+from hydro_serving_grpc import monitoring
 
 
 features = ["age", "sex", "salary", "confidence", "weight", "height"]
 description = ["< max", "> max", "custom threshold > 0.5", "custom model < 0.5"]
 
+
+def one_message_iter():
+    while True:
+        yield writer.WriteOneRequest(
+            model_version=random.randint(1, 10),
+            trace_data=monitoring.TraceData(
+                ts=int(datetime.datetime.utcnow().timestamp()),
+                uid=random.randint(1, 500),
+            ),
+            feature=random.choice(features),            
+            value=random.random() * random.randint(1, 25),
+            description=random.choice(description),
+            check=True,
+        )
+
+
+def many_message_iter():
+    i = one_message_iter()
+    while True:
+        k = random.randint(3, 15)
+        yield writer.WriteManyRequest(requests=[next(i) for _ in range(k)])
 
 @pytest.fixture()
 def stub():
@@ -18,35 +40,12 @@ def stub():
 
 @pytest.fixture()
 def one_messages():
-    def iterator():
-        while True:
-            yield writer.WriteOneRequest(
-                model_version=random.randint(1, 10),
-                feature=random.choice(features),
-                check=True,
-                timestamp=int(datetime.datetime.utcnow().timestamp()),
-                uid=random.randint(1, 500),
-                value=random.random() * random.randint(1, 25),
-                description=random.choice(description),
-            )
-    return iter(iterator())
+    return iter(one_message_iter())
 
 
 @pytest.fixture()
 def many_messages():
-    def iterator():
-        while True: 
-            k = random.randint(3, 15)
-            yield writer.WriteManyRequest(
-                model_version=random.choices(range(1, 10), k=k),
-                feature=random.choices(features, k=k),
-                check=itertools.repeat(True, k),
-                timestamp=itertools.repeat(1566388674598, k),
-                uid=random.choices(range(100), k=k),
-                value=random.choices(range(100), k=k),
-                description=random.choices(description, k=k),
-            )
-    return iter(iterator())
+    return iter(many_message_iter())
 
 
 def test_one_message(stub, one_messages):
