@@ -1,0 +1,4 @@
+pyarrow~=0.14.1
+pymongo==3.9.0
+pandas==0.25.1
+s3fs
